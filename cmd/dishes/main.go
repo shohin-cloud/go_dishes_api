@@ -63,11 +63,11 @@ func (app *application) run() {
 	v1.HandleFunc("/dishes/{dishId:[0-9]+}", app.updateDishHandler).Methods("PUT")
 	v1.HandleFunc("/dishes/{dishId:[0-9]+}", app.deleteDishHandler).Methods("DELETE")
 
-	// Posts
-	// v1.HandleFunc("/posts", app.createPostHandler).Methods("POST")
-	// v1.HandleFunc("/posts/{postId:[0-9]+}", app.getPostHandler).Methods("GET")
-	// v1.HandleFunc("/posts/{postId:[0-9]+}", app.updatePostHandler).Methods("PUT")
-	// v1.HandleFunc("/posts/{postId:[0-9]+}", app.deletePostHandler).Methods("DELETE")
+	// Ingredients
+	v1.HandleFunc("/ingredients", app.createIngredientHandler).Methods("POST")
+	v1.HandleFunc("/ingredients/{ingredientId:[0-9]+}", app.getIngredientByIdHandler).Methods("GET")
+	v1.HandleFunc("/ingredients/{ingredientId:[0-9]+}", app.updateIngredientHandler).Methods("PUT")
+	v1.HandleFunc("/ingredients/{ingredientId:[0-9]+}", app.deleteIngredientHandler).Methods("DELETE")
 
 	log.Printf("Starting server on %s\n", app.config.port)
 	err := http.ListenAndServe(app.config.port, r)

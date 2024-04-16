@@ -3,15 +3,18 @@ package model
 import (
 	"context"
 	"database/sql"
+	"fmt"
 	"log"
 	"time"
 )
 
 type Ingredient struct {
-	ID       string `json:"id"`
-	Name     string `json:"name"`
-	Quantity int    `json:"quantity"`
-	DishID   string `json:"dishId"`
+	ID        string `json:"id"`
+	CreatedAt string `json:"createdAt"`
+	UpdatedAt string `json:"updatedAt"`
+	Name      string `json:"name"`
+	Quantity  int    `json:"quantity"`
+	DishID    string `json:"dishId"`
 }
 
 type IngredientModel struct {
@@ -21,59 +24,65 @@ type IngredientModel struct {
 }
 
 func (i IngredientModel) Insert(ingredient *Ingredient) error {
+	fmt.Println(ingredient.Name, ingredient.Quantity)
+
 	query := `
 		INSERT INTO ingredients (name, quantity, dish_id)
 		VALUES ($1, $2, $3)
-		RETURNING id
+		RETURNING id, createdat, updatedat
 	`
 	args := []interface{}{ingredient.Name, ingredient.Quantity, ingredient.DishID}
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 
-	return i.DB.QueryRowContext(ctx, query, args...).Scan(&ingredient.ID)
+	return i.DB.QueryRowContext(ctx, query, args...).Scan(&ingredient.ID, &ingredient.CreatedAt, &ingredient.UpdatedAt)
 }
 
-func (i IngredientModel) GetAllByDishID(dishID string) ([]*Ingredient, error) {
+func (i IngredientModel) GetById(id string) (*Ingredient, error) {
 	query := `
-		SELECT id, name, quantity, dish_id
+		SELECT id, createdat, updatedat, name, quantity, dish_id
 		FROM ingredients
-		WHERE dish_id = $1
-		ORDER BY id
+		WHERE id = $1
 	`
+	var ingredient Ingredient
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
 
-	rows, err := i.DB.Query(query, dishID)
+	row := i.DB.QueryRowContext(ctx, query, id)
+	err := row.Scan(&ingredient.ID, &ingredient.CreatedAt, &ingredient.UpdatedAt, &ingredient.Name, &ingredient.Quantity, &ingredient.DishID)
+
 	if err != nil {
 		return nil, err
 	}
-	defer rows.Close()
 
-	var ingredients []*Ingredient
-	for rows.Next() {
-		var ingredient Ingredient
-		err := rows.Scan(&ingredient.ID, &ingredient.Name, &ingredient.Quantity, &ingredient.DishID)
-		if err != nil {
-			return nil, err
-		}
-		ingredients = append(ingredients, &ingredient)
-	}
-
-	if err := rows.Err(); err != nil {
-		return nil, err
-	}
-
-	return ingredients, nil
+	return &ingredient, nil
 }
 
-func (i IngredientModel) DeleteByDishID(dishID string) error {
+func (i IngredientModel) Update(ingredient *Ingredient) error {
+	query := `
+		UPDATE ingredients
+		SET name = $1, quantity = $2, dish_id = $3
+		WHERE id = $4
+		RETURNING updatedat
+	`
+
+	args := []interface{}{ingredient.Name, ingredient.Quantity, ingredient.DishID, ingredient.ID}
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	return i.DB.QueryRowContext(ctx, query, args...).Scan(&ingredient.UpdatedAt)
+}
+
+func (i IngredientModel) Delete(id string) error {
 	query := `
 		DELETE FROM ingredients
-		WHERE dish_id = $1
+		WHERE id = $1
 	`
 
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 
-	_, err := i.DB.ExecContext(ctx, query, dishID)
+	_, err := i.DB.ExecContext(ctx, query, id)
 
 	return err
 }
