@@ -9,6 +9,7 @@ import (
 
 	"github.com/gorilla/mux"
 	"github.com/shohin-cloud/dishes-api/pkg/dishes/model"
+	"github.com/shohin-cloud/dishes-api/pkg/jsonlog"
 
 	_ "github.com/lib/pq"
 )
@@ -24,6 +25,7 @@ type config struct {
 type application struct {
 	config config
 	models model.Models
+	logger *jsonlog.Logger
 }
 
 func main() {
@@ -31,7 +33,7 @@ func main() {
 	var cfg config
 	flag.StringVar(&cfg.port, "port", ":8081", "API server port")
 	flag.StringVar(&cfg.env, "env", "development", "Environment (development|staging|production)")
-	flag.StringVar(&cfg.db.dsn, "db-dsn", "postgres://postgres:admin@localhost/go_project?sslmode=disable", "PostgreSQL DSN")
+	flag.StringVar(&cfg.db.dsn, "db-dsn", "postgres://postgres:rootroot@localhost:5433/go_project?sslmode=disable", "PostgreSQL DSN")
 	flag.Parse()
 
 	// Connect to DB

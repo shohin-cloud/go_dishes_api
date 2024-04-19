@@ -6,6 +6,7 @@ import (
 
 	"github.com/gorilla/mux"
 	"github.com/shohin-cloud/dishes-api/pkg/dishes/model"
+	"github.com/shohin-cloud/dishes-api/pkg/dishes/validator"
 )
 
 func (app *application) respondWithError(w http.ResponseWriter, code int, message string) {
@@ -54,12 +55,44 @@ func (app *application) createDishHandler(w http.ResponseWriter, r *http.Request
 }
 
 func (app *application) getAllDishesHandler(w http.ResponseWriter, r *http.Request) {
-	dishes, err := app.models.Dishes.GetAll()
-	if err != nil {
-		app.respondWithError(w, http.StatusInternalServerError, "Failed to fetch dishes")
+	var input struct {
+		Name  string
+		Price string
+		model.Filters
+	}
+
+	v := validator.New()
+
+	qs := r.URL.Query()
+
+	input.Name = app.readString(qs, "name", "")
+	input.Price = app.readString(qs, "price", "")
+
+	input.Filters.Page = app.readInt(qs, "page", 1, v)
+	input.Filters.PageSize = app.readInt(qs, "page_size", 20, v)
+
+	input.Filters.Sort = app.readString(qs, "sort", "id")
+
+	input.Filters.SortSafelist = []string{
+		"id", "name", "price",
+		"-id", "-name", "-price",
+	}
+
+	if model.ValidateFilters(v, input.Filters); !v.Valid() {
+		app.failedValidationResponse(w, r, v.Errors)
 		return
 	}
-	app.respondWithJson(w, http.StatusOK, dishes)
+	dishes, metadata, err := app.models.Dishes.GetAll(input.Name, input.Price, input.Filters)
+
+	if err != nil {
+		app.serverErrorResponse(w, r, err)
+	}
+
+	err = app.writeJSON(w, http.StatusOK, envelope{"dishes": dishes, "metadata": metadata}, nil)
+
+	if err != nil {
+		app.serverErrorResponse(w, r, err)
+	}
 }
 
 func (app *application) getDishByIdHandler(w http.ResponseWriter, r *http.Request) {
@@ -134,6 +167,38 @@ func (app *application) readJSON(w http.ResponseWriter, r *http.Request, dst int
 
 	err := dec.Decode(dst)
 	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (app *application) writeJSON(w http.ResponseWriter, status int, data envelope,
+	headers http.Header) error {
+	// Use the json.MarshalIndent() function so that whitespace is added to the encoded JSON. Use
+	// no line prefix and tab indents for each element.
+	js, err := json.MarshalIndent(data, "", "\t")
+	if err != nil {
+		return err
+	}
+
+	// Append a newline to make it easier to view in terminal applications.
+	js = append(js, '\n')
+
+	// At this point, we know that we won't encounter any more errors before writing the response,
+	// so it's safe to add any headers that we want to include. We loop through the header map
+	// and add each header to the http.ResponseWriter header map. Note that it's OK if the
+	// provided header map is nil. Go doesn't through an error if you try to range over (
+	// or generally, read from) a nil map
+	for key, value := range headers {
+		w.Header()[key] = value
+	}
+
+	// Add the "Content-Type: application/json" header, then write the status code and JSON response.
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(status)
+	if _, err := w.Write(js); err != nil {
+		app.logger.PrintError(err, nil)
 		return err
 	}
 

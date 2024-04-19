@@ -38,34 +38,61 @@ func (d DishModel) Insert(dish *Dish) error {
 	return d.DB.QueryRowContext(ctx, query, args...).Scan(&dish.ID, &dish.CreatedAt, &dish.UpdatedAt)
 }
 
-func (d DishModel) GetAll() ([]*Dish, error) {
-	query := `
-		SELECT id, createdat, updatedat, name, description, price
-		FROM dishes
-		ORDER BY id
-	`
-
-	rows, err := d.DB.Query(query)
-	if err != nil {
-		return nil, err
+func (d DishModel) GetAll(name string, price string, filters Filters) ([]*Dish, Metadata, error) {
+	if price == "" {
+		price = "0"
 	}
+	query := fmt.Sprintf(`
+		SELECT count(*) OVER(), id, createdAt, updatedAt, name, description, price
+		FROM dishes
+		WHERE (LOWER(name) = LOWER($1) OR $1 = '')
+		AND (price >= $2 OR $2 = 0)
+		ORDER BY %s %s, id ASC
+		LIMIT $3 OFFSET $4
+	`, filters.sortColumn(), filters.sortDirection())
+
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	args := []interface{}{name, price, filters.limit(), filters.offset()}
+
+	rows, err := d.DB.QueryContext(ctx, query, args...)
+	if err != nil {
+		return nil, Metadata{}, err
+	}
+
 	defer rows.Close()
 
-	var dishes []*Dish
+	totalRecords := 0
+	dishes := []*Dish{}
+
 	for rows.Next() {
 		var dish Dish
-		err := rows.Scan(&dish.ID, &dish.CreatedAt, &dish.UpdatedAt, &dish.Name, &dish.Description, &dish.Price)
+
+		err := rows.Scan(
+			&totalRecords,
+			&dish.ID,
+			&dish.CreatedAt,
+			&dish.UpdatedAt,
+			&dish.Name,
+			&dish.Description,
+			&dish.Price,
+		)
+
 		if err != nil {
-			return nil, err
+			return nil, Metadata{}, err
 		}
+
 		dishes = append(dishes, &dish)
 	}
 
 	if err := rows.Err(); err != nil {
-		return nil, err
+		return nil, Metadata{}, err
 	}
 
-	return dishes, nil
+	metadata := calculateMetadata(totalRecords, filters.Page, filters.PageSize)
+
+	return dishes, metadata, nil // Return users and nil error
 }
 
 func (d DishModel) GetById(id string) (*Dish, error) {
