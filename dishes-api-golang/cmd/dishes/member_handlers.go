@@ -57,6 +57,12 @@ func (app *application) registerMemberHandler(w http.ResponseWriter, r *http.Req
 		return
 	}
 
+	err = app.models.Permissions.AddForMember(member.ID, "posts:read")
+	if err != nil {
+		app.serverErrorResponse(w, r, err)
+		return
+	}
+
 	token, err := app.models.Tokens.New(member.ID, 3*24*time.Hour, model.ScopeActivation)
 	if err != nil {
 		app.serverErrorResponse(w, r, err)

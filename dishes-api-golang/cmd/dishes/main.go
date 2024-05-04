@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"flag"
 	"fmt"
+	"os"
 
 	"github.com/shohin-cloud/dishes-api/pkg/dishes/model"
 	"github.com/shohin-cloud/dishes-api/pkg/jsonlog"
@@ -35,8 +36,11 @@ func main() {
 	var cfg config
 	flag.StringVar(&cfg.port, "port", ":8081", "API server port")
 	flag.StringVar(&cfg.env, "env", "development", "Environment (development|staging|production)")
-	flag.StringVar(&cfg.db.dsn, "db-dsn", "postgres://postgres:rootroot@localhost:5433/go_project?sslmode=disable", "PostgreSQL DSN")
+	flag.StringVar(&cfg.db.dsn, "db-dsn", "postgres://postgres:admin@localhost/social_media?sslmode=disable", "PostgreSQL DSN")
 	flag.Parse()
+
+	// Init logger
+	logger := jsonlog.NewLogger(os.Stdout, jsonlog.LevelInfo)
 
 	// Connect to DB
 	db, err := openDB(cfg)

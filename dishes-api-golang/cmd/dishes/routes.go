@@ -23,17 +23,17 @@ func (app *application) routes() http.Handler {
 	v1 := r.PathPrefix("/api/v1").Subrouter()
 
 	// Dishes
-	v1.HandleFunc("/dishes", app.createDishHandler).Methods("POST")
+	v1.HandleFunc("/dishes", app.requirePermission("posts:write", app.createDishHandler)).Methods("POST")
 	v1.HandleFunc("/dishes", app.getAllDishesHandler).Methods("GET")
-	v1.HandleFunc("/dishes/{dishId:[0-9]+}", app.getDishByIdHandler).Methods("GET")
-	v1.HandleFunc("/dishes/{dishId:[0-9]+}", app.updateDishHandler).Methods("PUT")
-	v1.HandleFunc("/dishes/{dishId:[0-9]+}", app.deleteDishHandler).Methods("DELETE")
+	v1.HandleFunc("/dishes/{dishId:[0-9]+}", app.requirePermission("posts:read", app.getDishByIdHandler)).Methods("GET")
+	v1.HandleFunc("/dishes/{dishId:[0-9]+}", app.requirePermission("posts:write", app.updateDishHandler)).Methods("PUT")
+	v1.HandleFunc("/dishes/{dishId:[0-9]+}", app.requirePermission("posts:write", app.deleteDishHandler)).Methods("DELETE")
 
 	// Ingredients
-	v1.HandleFunc("/ingredients", app.createIngredientHandler).Methods("POST")
+	v1.HandleFunc("/ingredients", app.requireActivatedMember(app.createIngredientHandler)).Methods("POST")
 	v1.HandleFunc("/ingredients/{ingredientId:[0-9]+}", app.getIngredientByIdHandler).Methods("GET")
-	v1.HandleFunc("/ingredients/{ingredientId:[0-9]+}", app.updateIngredientHandler).Methods("PUT")
-	v1.HandleFunc("/ingredients/{ingredientId:[0-9]+}", app.deleteIngredientHandler).Methods("DELETE")
+	v1.HandleFunc("/ingredients/{ingredientId:[0-9]+}", app.requireActivatedMember(app.updateIngredientHandler)).Methods("PUT")
+	v1.HandleFunc("/ingredients/{ingredientId:[0-9]+}", app.requireActivatedMember(app.deleteIngredientHandler)).Methods("DELETE")
 
 	// Members
 	v1.HandleFunc("/members", app.registerMemberHandler).Methods("POST")

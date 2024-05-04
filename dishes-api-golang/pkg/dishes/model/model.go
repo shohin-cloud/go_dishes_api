@@ -12,6 +12,7 @@ type Models struct {
 	Ingredients IngredientModel
 	Members     MemberModel
 	Tokens      TokenModel
+	Permissions PermissionModel
 }
 
 var (
@@ -37,6 +38,9 @@ func NewModels(db *sql.DB) Models {
 			ErrorLog: errorLog,
 		},
 		Members: MemberModel{
+			DB: db,
+		},
+		Permissions: PermissionModel{
 			DB: db,
 		},
 		Tokens: TokenModel{
