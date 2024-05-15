@@ -36,7 +36,7 @@ func main() {
 	var cfg config
 	flag.StringVar(&cfg.port, "port", ":8060", "API server port")
 	flag.StringVar(&cfg.env, "env", "development", "Environment (development|staging|production)")
-	flag.StringVar(&cfg.db.dsn, "db-dsn", "postgres://postgres:rootroot@db:5432/postgres?sslmode=disable", "PostgreSQL DSN")
+	flag.StringVar(&cfg.db.dsn, "db-dsn", "postgres://dishes_db_user:r7Y1IaUPdozGB8o27WmOjtysdS2aoBHN@dpg-cp28gs779t8c73fotm60-a.singapore-postgres.render.com/dishes_db", "PostgreSQL DSN")
 	flag.Parse()
 
 	// Init logger
