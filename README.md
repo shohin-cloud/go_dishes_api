@@ -72,6 +72,70 @@ Update an existing dish item by its ID.
 DELETE /dishes/:id
 Delete a specific dish item by its ID.
 ```
+# Ingredients REST API
+
+```sh
+# list of all menu items
+GET /ingredients
+Retrieve a list of all ingredients items.
+
+POST /ingredients
+Create a new ingredients item.
+
+GET /ingredients/:id
+Retrieve a specific ingredients item by its ID.
+
+PUT /ingredients/:id
+Update an existing ingredients item by its ID.
+
+DELETE /ingredients/:id
+Delete a specific ingredients item by its ID.
+```
+
+# Drinks REST API
+
+```sh
+# list of all drinks items
+GET /drinks
+Retrieve a list of all ingredients items.
+
+POST /drinks
+Create a new drinks item.
+
+GET /drinks/:id
+Retrieve a specific drinks item by its ID.
+
+PUT /drinks/:id
+Update an existing drinks item by its ID.
+
+DELETE /drinks/:id
+Delete a specific drinks item by its ID.
+```
+
+# Review REST API
+
+```sh
+# list of all review items
+GET /review
+Retrieve a list of all review items.
+
+POST /review
+Create a new review item.
+
+GET /review/:id
+Retrieve a specific review item by its ID.
+
+PUT /review/:id
+Update an existing review item by its ID.
+
+DELETE /review/:id
+Delete a specific review item by its ID.
+```
+
+
+
+
+
 
 # DB Structure
 
