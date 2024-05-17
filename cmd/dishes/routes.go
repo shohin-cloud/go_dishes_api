@@ -50,6 +50,13 @@ func (app *application) routes() http.Handler {
 	v1.HandleFunc("/members/activated", app.activateMemberHandler).Methods("PUT")
 	v1.HandleFunc("/tokens/authentication", app.createAuthenticationTokenHandler).Methods("POST")
 
+	// Reviews
+	v1.HandleFunc("/reviews", app.CreateReviewHandler).Methods("POST")
+	v1.HandleFunc("/reviews/{reviewID}", app.GetReviewHandler).Methods("GET")
+	v1.HandleFunc("/reviews/{reviewID}", app.UpdateReviewHandler).Methods("PUT")
+	v1.HandleFunc("/reviews/{reviewID}", app.DeleteReviewHandler).Methods("DELETE")
+	v1.HandleFunc("/reviews", app.GetAllReviewsHandler).Methods("GET")
+
 	// Wrap the router with the panic recovery middleware and rate limit middleware.
 	return app.authenticate(r)
 }
