@@ -145,21 +145,48 @@ Delete a specific review item by its ID.
 
 
 Table dish{
-    id          bigserial PRIMARY KEY,
-    createdAt   timestamp(0) with time zone NOT NULL DEFAULT NOW(),
-    updatedAt   timestamp(0) with time zone NOT NULL DEFAULT NOW(),
-    name        text                        NOT NULL,
-    description text                        NOT NULL,
-    price       numeric(10, 2)              NOT NULL
+    id          bigserial   [primary key]
+    createdAt   timestamp(0) 
+    updatedAt   timestamp(0) 
+    name        text                       
+    description text                    
+    price       numeric(10, 2)            
 }
 
 Table ingredients {
-    id         bigserial PRIMARY KEY,
-    createdAt  timestamp(0) with time zone NOT NULL DEFAULT NOW(),
-    updatedAt  timestamp(0) with time zone NOT NULL DEFAULT NOW(),
-    name       text                        NOT NULL,
-    quantity   integer                     NOT NULL,
-    dish_id    bigserial REFERENCES dishes (id)
+    id         bigserial  [primary key]
+    createdAt  timestamp(0) 
+    updatedAt  timestamp(0) 
+    name       text                       
+    quantity   integer                  
+    dish_id    bigserial 
+}
+
+
+Table drinks {
+
+    id          bigserial [primary key]
+    createdAt   timestamp(0) 
+    updatedAt   timestamp(0) 
+    name        text                       
+    description text                      
+    price       numeric(10, 2)            
+}
+
+Table review {
+    id                        bigserial 
+    dish_id                   INTEGER 
+    drink_id                  INTEGER 
+    rating                    INT 
+    comment                   TEXT 
+    createdAt                 timestamp(0) 
+    updatedAt                 timestamp(0) 
+}
+
+
+Ref: "dish"."id" < "ingredients"."dish_id"
+Ref: "dish"."id" < "review"."dish_id"
+Ref: "drinks"."id" < "review"."drink_id"
 }
 ```
 
