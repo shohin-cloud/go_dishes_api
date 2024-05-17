@@ -8,9 +8,6 @@ This project is a Go-based API server for managing dishes. It connects to a Post
 - [Configuration](#configuration)
 - [Running the Server](#running-the-server)
 - [Project Structure](#project-structure)
-- [Usage](#usage)
-- [Contributing](#contributing)
-- [License](#license)
 
 ## Installation
 
