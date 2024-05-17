@@ -106,5 +106,4 @@ Table ingredients {
 
 ```sh
 https://dishes-api.onrender.com/api/v1/dishes
-https://dishes-api.onrender.com/api/v1//ingredients
 ```
