@@ -35,6 +35,13 @@ func (app *application) routes() http.Handler {
 	v1.HandleFunc("/dishes/{dishId:[0-9]+}", app.updateDishHandler).Methods("PUT")
 	v1.HandleFunc("/dishes/{dishId:[0-9]+}", app.deleteDishHandler).Methods("DELETE")
 
+    // Drinks
+    v1.HandleFunc("/drinks", app.createDrinkHandler).Methods("POST")
+    v1.HandleFunc("/drinks", app.getAllDrinksHandler).Methods("GET")
+    v1.HandleFunc("/drinks/{drinkId:[0-9]+}", app.getDrinkByIdHandler).Methods("GET")
+    v1.HandleFunc("/drinks/{drinkId:[0-9]+}", app.updateDrinkHandler).Methods("PUT")
+    v1.HandleFunc("/drinks/{drinkId:[0-9]+}", app.deleteDrinkHandler).Methods("DELETE")
+
 	// Ingredients
 	// v1.HandleFunc("/ingredients", app.createIngredientHandler).Methods("POST")
 	// v1.HandleFunc("/ingredients/{ingredientId:[0-9]+}", app.getIngredientByIdHandler).Methods("GET")
